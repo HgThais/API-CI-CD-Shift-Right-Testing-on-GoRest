@@ -18,7 +18,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "// 1. Kiểm tra HTTP Status Code là 201 Created\r\npm.test(\"Status code is 201 Created\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\n// Parse dữ liệu phản hồi\r\nlet responseData = pm.response.json();\r\n\r\n// 2. Kiểm tra cấu trúc Response\r\npm.test(\"Response body contains valid user ID and created email\", function () {\r\n    pm.expect(responseData).to.have.property(\"id\");\r\n    pm.expect(responseData.id).to.be.a(\"number\");\r\n});\r\n\r\n// 3. API Chaining: Trích xuất ID và Email lưu vào Collection Variables\r\npm.collectionVariables.set(\"userId\", responseData.id);\r\npm.collectionVariables.set(\"createdEmail\", responseData.email);\r\nconsole.log(\"Extracted userId:\", responseData.id);"
+                  "// 1. Kiểm tra HTTP Status Code là 201 Created\r\npm.test(\"Status code is 201 Created\", function () {\r\n    pm.response.to.have.status(201);\r\n});\r\n\r\n// Parse dữ liệu phản hồi\r\nlet responseData = pm.response.json();\r\n\r\n// 2. Kiểm tra cấu trúc Response\r\npm.test(\"Response body contains valid user ID and created email\", function () {\r\n    pm.expect(responseData).to.have.property(\"id\");\r\n    pm.expect(responseData.id).to.be.a(\"number\");\r\n});\r\n\r\n// 3. API Chaining: Trích xuất ID và Email lưu vào Collection Variables\r\npm.environment.set(\"userId\", responseData.id);\r\npm.environment.set(\"createdEmail\", responseData.email);\r\nconsole.log(\"Extracted userId:\", responseData.id);"
                 ]
               }
             },
@@ -47,7 +47,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"name\": \"{{name}}\",\r\n  \"gender\": \"{{gender}}\",\r\n  \"email\": \"{{unique_email}}\",\r\n  \"status\": \"{{status}}\"\r\n}",
+              "raw": "{\n    \"name\": \"{{name}}\",\n    \"gender\": \"{{gender}}\",\n    \"email\": \"{{dynamic_email}}\",\n    \"status\": \"active\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
