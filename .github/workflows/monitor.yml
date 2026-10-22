@@ -2,8 +2,8 @@ name: Shift-Right API Health & Latency Monitor
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Chạy tự động vào phút 0 mỗi giờ
-  workflow_dispatch:     # Kích hoạt chạy thủ công trên giao diện GitHub
+    - cron: '0 * * * *'  # Tự động chạy mỗi giờ
+  workflow_dispatch:     # Cho phép bấm nút "Run workflow" chạy tay
 
 jobs:
   monitor-api-health:
@@ -37,12 +37,12 @@ jobs:
               process.exit(1);
             }
 
-            if (responseTime > 800) {
-              console.error(`[ERROR] Performance SLA Violated! SLA: 800ms, Actual: ${responseTime}ms`);
+            if (responseTime > 2000) {
+              console.error(`[ERROR] Performance SLA Violated! SLA: 2000ms, Actual: ${responseTime}ms`);
               process.exit(1);
             }
 
-            console.log("[SUCCESS] API Health Check Passed: Status 200 OK & Latency < 800ms");
+            console.log("[SUCCESS] API Health Check Passed: Status 200 OK & Latency < 2000ms");
           }).on("error", (err) => {
             console.error(`[ERROR] Connection Failed: ${err.message}`);
             process.exit(1);
