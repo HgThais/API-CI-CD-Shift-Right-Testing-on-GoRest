@@ -24,7 +24,7 @@ jobs:
 
       - name: Execute Postman Collection via Newman CLI
         run: |
-          newman run Collection.json \
+          newman run 2474802017156_NguyenHoangThai_GoRest.postman_collection.json \
             -e 2474802017156_NguyenHoangThai_GoRest_Env.postman_environment.json \
             -d users.csv \
             --env-var "token=${{ secrets.GOREST_TOKEN }}" \
