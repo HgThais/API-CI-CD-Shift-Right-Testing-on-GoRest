@@ -1,0 +1,50 @@
+name: Shift-Right API Health & Latency Monitor
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Chạy tự động vào phút 0 mỗi giờ
+  workflow_dispatch:     # Kích hoạt chạy thủ công trên giao diện GitHub
+
+jobs:
+  monitor-api-health:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Execute API Performance & SLA Check
+        run: |
+          node -e '
+          const https = require("https");
+          const startTime = Date.now();
+          const targetUrl = "https://gorest.co.in/public/v2/users";
+
+          console.log(`[MONITOR] Checking endpoint: ${targetUrl}`);
+
+          https.get(targetUrl, (res) => {
+            const responseTime = Date.now() - startTime;
+            console.log(`[MONITOR] HTTP Status: ${res.statusCode}`);
+            console.log(`[MONITOR] Response Time: ${responseTime}ms`);
+
+            if (res.statusCode !== 200) {
+              console.error(`[ERROR] API Health Check Failed! Status Code: ${res.statusCode}`);
+              process.exit(1);
+            }
+
+            if (responseTime > 800) {
+              console.error(`[ERROR] Performance SLA Violated! SLA: 800ms, Actual: ${responseTime}ms`);
+              process.exit(1);
+            }
+
+            console.log("[SUCCESS] API Health Check Passed: Status 200 OK & Latency < 800ms");
+          }).on("error", (err) => {
+            console.error(`[ERROR] Connection Failed: ${err.message}`);
+            process.exit(1);
+          });
+          '
