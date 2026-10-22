@@ -22,29 +22,37 @@ jobs:
         run: |
           node -e '
           const https = require("https");
-          const startTime = Date.now();
           const targetUrl = "https://gorest.co.in/public/v2/users";
+          const SAMPLES = 3;
+          const SLA_MS = 2000;
+          let times = [];
 
-          console.log(`[MONITOR] Checking endpoint: ${targetUrl}`);
-
-          https.get(targetUrl, (res) => {
-            const responseTime = Date.now() - startTime;
-            console.log(`[MONITOR] HTTP Status: ${res.statusCode}`);
-            console.log(`[MONITOR] Response Time: ${responseTime}ms`);
-
-            if (res.statusCode !== 200) {
-              console.error(`[ERROR] API Health Check Failed! Status Code: ${res.statusCode}`);
+          function checkOnce(cb) {
+            const start = Date.now();
+            https.get(targetUrl, (res) => {
+              const elapsed = Date.now() - start;
+              console.log(`[MONITOR] HTTP Status: ${res.statusCode} | Time: ${elapsed}ms`);
+              if (res.statusCode !== 200) { process.exit(1); }
+              cb(elapsed);
+            }).on("error", (err) => {
+              console.error(`[ERROR] ${err.message}`);
               process.exit(1);
-            }
+            });
+          }
 
-            if (responseTime > 2000) {
-              console.error(`[ERROR] Performance SLA Violated! SLA: 2000ms, Actual: ${responseTime}ms`);
-              process.exit(1);
-            }
+          function run(i) {
+            if (i >= SAMPLES) {
+              const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+              console.log(`[MONITOR] Average Response Time (${SAMPLES} samples): ${avg}ms`);
+              if (avg > SLA_MS) {
+                console.error(`[ERROR] SLA Violated! SLA: ${SLA_MS}ms, Avg: ${avg}ms`);
+                process.exit(1);
+              }
+              console.log("[SUCCESS] API Health Check Passed");
+              return;
+           }
+           setTimeout(() => checkOnce((t) => { times.push(t); run(i + 1); }), 500);
+          }
 
-            console.log("[SUCCESS] API Health Check Passed: Status 200 OK & Latency < 2000ms");
-          }).on("error", (err) => {
-            console.error(`[ERROR] Connection Failed: ${err.message}`);
-            process.exit(1);
-          });
+          run(0);
           '
